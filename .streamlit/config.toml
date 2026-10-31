@@ -1,0 +1,14 @@
+[server]
+# Don't scan installed libraries for code changes. Without this, Streamlit inspects every
+# transformers sub-module and floods the terminal with harmless "No module named 'torchvision'" logs.
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#d6608a"
+backgroundColor = "#fdeef3"
+secondaryBackgroundColor = "#fbdde7"
+textColor = "#4a2633"

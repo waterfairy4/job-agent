@@ -1,0 +1,56 @@
+﻿key,name,item,type,human,verdict
+2d37e2bb:0,Huawei – AI Application Engineer - AI技术应用,"Develop, integrate and iteratively optimize LLM and AI algorithm applications in business scenarios",duty,partial,partial
+2d37e2bb:1,Huawei – AI Application Engineer - AI技术应用,Conduct requirements analysis for LLM/AI algorithm applications,duty,missing,partial
+2d37e2bb:2,Huawei – AI Application Engineer - AI技术应用,Fine-tune models and build RAG retrieval to improve model performance across scenarios,duty,partial,partial
+2d37e2bb:3,Huawei – AI Application Engineer - AI技术应用,"Collaborate with product, data and business teams",duty,missing,missing
+2d37e2bb:4,Huawei – AI Application Engineer - AI技术应用,"Build AI data analysis, effect evaluation, issue diagnosis and continuous optimization to improve UX and business value",duty,strong,partial
+2d37e2bb:5,Huawei – AI Application Engineer - AI技术应用,"Degree in AI, computer science, software engineering, electronic information, automation or related field",must,strong,strong
+2d37e2bb:6,Huawei – AI Application Engineer - AI技术应用,Familiar with mainstream LLM application development frameworks,must,partial,partial
+2d37e2bb:7,Huawei – AI Application Engineer - AI技术应用,"Understand LLM principles such as Transformer architecture, fine-tuning techniques, vector databases",must,partial,partial
+2d37e2bb:8,Huawei – AI Application Engineer - AI技术应用,"Understand AI algorithm principles such as neural networks, reinforcement learning, tree models, knowledge graphs",must,partial,partial
+2d37e2bb:9,Huawei – AI Application Engineer - AI技术应用,"Solid programming skills, proficient in at least one of Python, C++, Java",must,strong,strong
+2d37e2bb:10,Huawei – AI Application Engineer - AI技术应用,"Experience applying LLMs such as GPT, DeepSeek, Qwen series",nice,strong,strong
+2d37e2bb:11,Huawei – AI Application Engineer - AI技术应用,"Experience developing neural networks such as CNN, RNN, GNN",nice,missing,missing
+2d37e2bb:12,Huawei – AI Application Engineer - AI技术应用,"Familiarity with NLP, knowledge graphs, intelligent QA, dialogue systems, text-to-image or text-to-video",nice,partial,partial
+2d98386a:0,Huawei – AI Model Engineer – AI Model Evaluation,"Design and develop evaluation systems, methods and processes for NLP, multimodal understanding/generation and agent large models",duty,partial,partial
+2d98386a:1,Huawei – AI Model Engineer – AI Model Evaluation,"Build tools, sandboxes and scaffolding required for model evaluation",duty,partial,partial
+2d98386a:2,Huawei – AI Model Engineer – AI Model Evaluation,"Design and develop evaluation sets, observation metrics and scoring standards",duty,strong,strong
+2d98386a:3,Huawei – AI Model Engineer – AI Model Evaluation,Assess and ensure the quality of evaluation sets,duty,partial,partial
+2d98386a:4,Huawei – AI Model Engineer – AI Model Evaluation,Systematically analyze evaluation results,duty,strong,strong
+2d98386a:5,Huawei – AI Model Engineer – AI Model Evaluation,Develop automated labeling and automatic clustering algorithms for automated analysis,duty,missing,missing
+2d98386a:6,Huawei – AI Model Engineer – AI Model Evaluation,"Degree in Computer Science, Artificial Intelligence, Data Science, Software Engineering, Statistical Mathematics or related field",must,strong,strong
+2d98386a:7,Huawei – AI Model Engineer – AI Model Evaluation,Proficient in Python or other programming languages,must,strong,strong
+2d98386a:8,Huawei – AI Model Engineer – AI Model Evaluation,Familiar with deep learning frameworks,must,strong,strong
+2d98386a:9,Huawei – AI Model Engineer – AI Model Evaluation,Software engineering and algorithm implementation capability,must,strong,strong
+2d98386a:10,Huawei – AI Model Engineer – AI Model Evaluation,"Strong learning ability, self-motivation, teamwork and sense of responsibility",must,partial,partial
+2d98386a:11,Huawei – AI Model Engineer – AI Model Evaluation,"Experience training, fine-tuning and deploying language/speech/multimodal/spatial intelligence models",nice,partial,partial
+2d98386a:12,Huawei – AI Model Engineer – AI Model Evaluation,"Proficient in data processing, analysis or model validation methods and tools",nice,strong,strong
+2d98386a:13,Huawei – AI Model Engineer – AI Model Evaluation,"Published papers at top-tier conferences such as NeurIPS, ICML, AAAI, VLDB",nice,missing,missing
+2d98386a:14,Huawei – AI Model Engineer – AI Model Evaluation,"Relevant internship experience or awards in high-level competitions such as ACM, ICPC",nice,partial,partial
+2fa6f910:0,Unknown company – AI Large Model Evaluation Engineer,"Degree in Computer Science, AI, Data Science, Software Engineering, Statistics or related",must,strong,strong
+2fa6f910:1,Unknown company – AI Large Model Evaluation Engineer,Proficient in Python,must,strong,strong
+2fa6f910:2,Unknown company – AI Large Model Evaluation Engineer,Familiar with deep learning frameworks,must,strong,strong
+2fa6f910:3,Unknown company – AI Large Model Evaluation Engineer,Software engineering and algorithm implementation ability,must,strong,strong
+2fa6f910:4,Unknown company – AI Large Model Evaluation Engineer,Strong learning ability and self-motivation,must,partial,partial
+2fa6f910:5,Unknown company – AI Large Model Evaluation Engineer,Teamwork and sense of responsibility,must,missing,partial
+2fa6f910:6,Unknown company – AI Large Model Evaluation Engineer,"Experience training, fine-tuning and deploying language/speech/multimodal/spatial intelligence models",nice,partial,partial
+2fa6f910:7,Unknown company – AI Large Model Evaluation Engineer,"Proficient in data processing, analysis or model validation methods and tools",nice,strong,strong
+2fa6f910:8,Unknown company – AI Large Model Evaluation Engineer,"Papers at top conferences such as NeurIPS, ICML, AAAI, VLDB",nice,missing,missing
+2fa6f910:9,Unknown company – AI Large Model Evaluation Engineer,Relevant internship experience,nice,partial,strong
+2fa6f910:10,Unknown company – AI Large Model Evaluation Engineer,"Awards in high-level competitions such as ACM, ICPC",nice,missing,missing
+da304d91:0,Huawei – Large Model Training and Inference Systems Researcher,"Conduct innovative research on key technologies and system architectures for large model training and inference (Agent, Language, Multimodal, Generative Recommendation, Spatial Intelligence)",duty,missing,partial
+da304d91:1,Huawei – Large Model Training and Inference Systems Researcher,"Lead design and research of training and inference frameworks and acceleration features (pre-training, RL post-training, Agentic AI, inference engines, service-oriented architecture)",duty,missing,partial
+da304d91:2,Huawei – Large Model Training and Inference Systems Researcher,"Research optimization schemes for AI training/inference systems via hardware-software co-design of compute, memory, communication, and I/O",duty,missing,missing
+da304d91:3,Huawei – Large Model Training and Inference Systems Researcher,Track latest research and technology trends in AI cluster training/inference algorithms and system optimization,duty,partial,missing
+da304d91:4,Huawei – Large Model Training and Inference Systems Researcher,Participate in top industry conferences and contribute to open-source communities,duty,missing,missing
+da304d91:5,Huawei – Large Model Training and Inference Systems Researcher,Drive commercialization of research results and integrate cutting-edge achievements into R&D,duty,missing,missing
+da304d91:6,Huawei – Large Model Training and Inference Systems Researcher,"Degree in Artificial Intelligence, Machine Learning, Software Engineering, Computer Science, System Architecture, Statistical Mathematics, Data Science, or related fields",must,strong,strong
+da304d91:7,Huawei – Large Model Training and Inference Systems Researcher,Solid algorithm and code implementation skills,must,strong,strong
+da304d91:8,Huawei – Large Model Training and Inference Systems Researcher,"Deep understanding of large model architecture, AI frameworks, and AI systems",must,partial,partial
+da304d91:9,Huawei – Large Model Training and Inference Systems Researcher,Knowledge of distributed computing and storage systems and parallel software development principles,must,missing,missing
+da304d91:10,Huawei – Large Model Training and Inference Systems Researcher,In-depth research experience in training and inference of large models (language/multimodal/Agent/spatial intelligence),must,partial,partial
+da304d91:11,Huawei – Large Model Training and Inference Systems Researcher,Proficiency in cutting-edge methods and tools for optimizing training and inference systems,must,missing,partial
+da304d91:12,Huawei – Large Model Training and Inference Systems Researcher,Ability to independently conduct innovative research and lead a team to overcome technical challenges,must,partial,partial
+da304d91:13,Huawei – Large Model Training and Inference Systems Researcher,"Multiple high-quality papers as first author or major contributor in top-tier conferences (NeurIPS, ICML, ICLR, CVPR, ACL, ISCA, MICRO, HPCA, ASPLOS, OSDI, SOSP, VLDB)",nice,missing,missing
+da304d91:14,Huawei – Large Model Training and Inference Systems Researcher,Internship experience at top research institutions,nice,missing,missing
+da304d91:15,Huawei – Large Model Training and Inference Systems Researcher,Awards in high-level competitions such as ACM,nice,missing,missing

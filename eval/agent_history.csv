@@ -1,0 +1,6 @@
+version,date,metric,value,settings
+v3,2026-10-31,routing_accuracy,0.9756,model deepseek-flash
+v4,2026-10-31,routing_accuracy,1.0000,model deepseek-flash
+v1,2026-10-31,recall@5_bm25,0.8327,"15 chunks, chunk size 600, BAAI/bge-m3"
+v1,2026-10-31,recall@5_dense,0.7435,"15 chunks, chunk size 600, BAAI/bge-m3"
+v1,2026-10-31,recall@5_hybrid,0.8863,"15 chunks, chunk size 600, BAAI/bge-m3"

@@ -1,0 +1,13 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Tests use fake models, so skip the heavy local-embedding package (PyTorch).
+      - run: grep -v -e huggingface -e sentence-transformers requirements.txt > ci-requirements.txt && pip install -r ci-requirements.txt
+      - run: pytest -q

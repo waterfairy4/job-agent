@@ -1,0 +1,42 @@
+message,expected,note
+"岗位职责：负责大模型评测体系建设，设计评测集与评分标准。任职要求：熟悉Python，有大模型评测经验，2027届硕士。",analyze_job,pasted posting (Chinese)
+"Responsibilities: build evaluation pipelines for LLMs. Requirements: Python, PyTorch, experience with RAG. MSc 2027.",analyze_job,pasted posting (English)
+"帮我分析一下这个岗位：大模型算法实习生，负责SFT与RLHF，要求熟悉PyTorch和Transformers。",analyze_job,posting with a request
+"Can you match this job to my profile? Job: LLM Agent Engineer at Tencent. Build agent workflows with LangChain; Python required.",analyze_job,posting inside a question
+"https://jobs.bytedance.com/campus/position/7698939355826735413/detail",fetch_job,bare link
+"看看这个岗位适不适合我 https://www.nowcoder.com/jobs/detail/456611",fetch_job,link with Chinese request
+"Please read this posting and tell me my match: https://careers.tencent.com/jobdesc.html?postId=123",fetch_job,link with English request
+"帮我找北京的2027届大模型评测岗位",find_jobs,search Chinese
+"Find LLM evaluation jobs in Shanghai for 2027 graduates",find_jobs,search English
+"搜一下上海或杭州的大模型算法校招",find_jobs,search two cities
+"Look for agent engineer internships in Beijing",find_jobs,internship search
+"有没有适合我的多语言NLP岗位？在北京，2027届",find_jobs,question form
+"Research the company for job a1b2c3d4",research_company,research by id
+"帮我了解一下 a1b2c3d4 这个岗位的团队和公司情况",research_company,research Chinese
+"I have an interview for job a1b2c3d4 next week. What should I know about the team?",research_company,interview prep
+"Make me a CV for job a1b2c3d4",build_cv,CV English
+"给 a1b2c3d4 这个岗位做一份中文简历",build_cv,CV Chinese
+"Update my CV for e8247213 in English",build_cv,update CV
+"生成针对 e8247213 的定制简历PDF",build_cv,tailored PDF
+"Suggest better CV bullets for job a1b2c3d4",tailor_cv,bullets only
+"针对 a1b2c3d4 给我改几条简历要点",tailor_cv,bullets Chinese
+"How can I close my gaps for job a1b2c3d4?",plan_gaps,gaps English
+"a1b2c3d4 这个岗位我还缺什么，怎么补？",plan_gaps,gaps Chinese
+"What should I learn to fit job e8247213 better?",plan_gaps,learning plan
+"Save job a1b2c3d4 to my tracker",save_job,save
+"我投了 a1b2c3d4，帮我记录一下",save_job,applied Chinese
+"I applied to job e8247213 today, update it",save_job,status update
+"Match job a1b2c3d4 again against my profile",match_job,re-match
+"重新匹配一下 e8247213",match_job,re-match Chinese
+"Do I have any experience with LoRA fine-tuning?",search_profile,own background
+"我的简历里有哪些和智能体相关的经历？",search_profile,own background Chinese
+"Which of my projects used PyTorch?",search_profile,own background
+"Hi!",none,greeting
+"你好，你能做什么？",none,capabilities
+"What is Reciprocal Rank Fusion?",none,general knowledge
+"解释一下什么是 Cohen's kappa",none,general knowledge Chinese
+"Thanks, that's all for today",none,closing
+"Find me a job",none,unclear role and city: ask first
+"我拿到了 e8247213 的面试！",save_job,progress: interview
+"a1b2c3d4 rejected me today",save_job,progress: rejected
+"I applied to a1b2c3d4 through the campus site with the tailored CV",save_job,applied with channel and CV version

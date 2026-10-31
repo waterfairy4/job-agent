@@ -1,0 +1,29 @@
+query,relevant,note
+大模型评测经验,端到端评估流程|评测集|评估方法,evaluation experience
+LLM evaluation pipeline design,端到端评估流程|智能体评估流程|评测集,evaluation (English query)
+LoRA 微调经验,LoRA 微调,LoRA
+parameter-efficient fine-tuning,LoRA 微调|PEFT,PEFT (English query)
+熟悉 PyTorch 等深度学习框架,PyTorch,framework
+Agent 工作流搭建能力,ReAct|智能体,agents
+LangGraph or LangChain experience,LangGraph,agent framework
+RAG 检索增强生成,RAG|混合检索,RAG
+hybrid retrieval BM25,BM25,retrieval
+强化学习相关项目,强化学习,RL
+多语言与跨文化评估,多语言|跨文化,multilingual
+统计分析与实验设计,统计分析|实验设计,statistics
+REST API 开发经验,REST API,backend
+全栈 Web 开发,React|Spring Boot,full stack
+Docker and Linux,Docker,devops
+LLM-as-judge agreement with humans,Cohen|一致率,judge evaluation
+指令微调模型的对比实验,指令微调模型|对照实验,model comparison
+硕士在读 计算机专业,计算机科学与技术,degree
+韩语或其他外语能力,韩语|土耳其语,languages
+发表论文 第一作者,第一作者,paper
+拥塞控制与 TCP,BBR|拥塞控制,networking
+Linux 容器与 cgroup,cgroup,systems
+内核旁路高性能网络,内核旁路|mTCP,networking survey
+分布式训练 网内聚合,网内聚合|SwitchML,distributed training
+Wasserstein 分布距离,Wasserstein,metrics
+加权调查数据与稳健性分析,WEIGHT_W26|稳健性,statistics
+FastAPI 后端服务,FastAPI,service
+SQLite 数据库,SQLite,storage
