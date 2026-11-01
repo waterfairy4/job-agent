@@ -58,6 +58,7 @@ flowchart LR
 | `jobagent/cv_eval.py`, `evaluate_cv.py` | Quality evaluation of the generated CVs (blind A/B, LLM judge, agreement) |
 | `export_openapi.py`, `integrations/DIFY.md` | Use the API as a tool in Dify or Coze |
 | `jobagent/demo.py`, `demo/`, `Dockerfile`, `DEPLOY.md` | Public demo mode and free deployment |
+| `android/` | Android app (APK) that opens the deployed demo; built by GitHub Actions |
 | `app.py` | Web UI (Streamlit) |
 | `cli.py` | Terminal chat |
 | `ingest.py` | Indexes `profile/` |

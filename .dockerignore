@@ -7,3 +7,4 @@ eval/cv_ratings.csv
 assets/background.jpg
 __pycache__/
 .pytest_cache/
+android/
