@@ -400,8 +400,15 @@ def normalize_layout(cv) -> None:
     for sec in cv.sections:
         if sec.layout != "table" and any(k in sec.title.lower() for k in PARAGRAPHS):
             sec.layout = "text"
+        if sec.layout in ("text", "table"):
             for e in sec.entries:
-                if e.title and e.bullets and not e.title.rstrip().endswith(("：", ":")):
+                # These layouts print only the title and the bullets. The model sometimes puts the content in
+                # the second-line fields ("编程语言：" + subtitle "Python、SQL"), which then vanished from the PDF.
+                extra = [x for x in (e.subtitle, e.meta, e.date) if x.strip()]
+                if extra:
+                    e.bullets = [*extra, *e.bullets]
+                    e.subtitle = e.meta = e.date = ""
+                if sec.layout == "text" and e.title and e.bullets and not e.title.rstrip().endswith(("：", ":")):
                     e.title = e.title.rstrip() + ("：" if CJK.search(e.title) else ": ")
 
 

@@ -217,6 +217,31 @@ def test_objective_may_be_reworded_and_paragraph_sections(tmp_path):
     assert pages == 1
 
 
+def test_skills_and_languages_in_second_line_fields_are_printed(tmp_path):
+    """Seen in the demo: "编程语言：" printed with nothing after it, because the model put the skills in
+    `subtitle`, which the table/text layouts did not print."""
+    from pypdf import PdfReader
+
+    from jobagent.cvdoc import normalize_layout
+    from jobagent.cvpdf import render_pdf
+    from jobagent.schemas import CVDocument, CVEntry, CVSection
+
+    cv = CVDocument(name="林晓", sections=[
+        CVSection(title="技术能力", layout="text", entries=[
+            CVEntry(title="编程语言：", subtitle="Python（主要）、SQL、JavaScript"),
+            CVEntry(title="工程：", meta="FastAPI、Docker")]),
+        CVSection(title="技能", layout="table", entries=[CVEntry(title="机器学习", subtitle="PyTorch")]),
+        CVSection(title="语言", entries=[CVEntry(title="语言", subtitle="中文（母语）· 英语（专业工作水平）")])])
+    normalize_layout(cv)
+    assert cv.sections[0].entries[0].bullets == ["Python（主要）、SQL、JavaScript"]
+    assert cv.sections[2].entries[0].bullets == ["中文（母语）· 英语（专业工作水平）"]
+    assert all(not e.subtitle and not e.meta for s in cv.sections for e in s.entries)
+    pdf, _ = render_pdf(cv, tmp_path / "cv.pdf")
+    text = "".join(PdfReader(pdf).pages[0].extract_text().split())
+    for word in ("SQL", "FastAPI", "PyTorch", "英语"):
+        assert word in text
+
+
 def test_structured_output_retries_when_the_model_returns_nothing():
     import pytest
 
