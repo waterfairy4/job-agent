@@ -103,3 +103,25 @@ def apply(st) -> dict:
     return {"title": "💗 Job Agent", "user": "🌸", "assistant": "🧸", "thinking": "Thinking… 💭",
             "caption": "Your cozy job-hunting buddy ✨ Paste a job or a link, find jobs, or ask me to make your CV.",
             "yes": "💖 Yes, save it", "no": "🙅 Not now"}
+
+
+SCROLL_JS = """<script>
+// Keep the newest chat message in view: after every rerun the page otherwise jumps back to the top.
+// Runs in a tiny component frame; the app page is its parent (same origin). Render no. %s
+const doc = window.parent.document;
+function down() {
+  for (const sel of ['[data-testid="stAppScrollToBottomContainer"]', '[data-testid="stMain"]', 'section.main']) {
+    const el = doc.querySelector(sel);
+    if (el && el.scrollHeight > el.clientHeight) el.scrollTop = el.scrollHeight;
+  }
+  window.parent.scrollTo(0, doc.body.scrollHeight);
+}
+[50, 300, 1000].forEach(t => setTimeout(down, t));
+</script>"""
+
+
+def scroll_to_bottom(st, key) -> None:
+    """Scroll the chat to the newest message. `key` changes when the chat changes, so the script runs again."""
+    import streamlit.components.v1 as components
+
+    components.html(SCROLL_JS % key, height=0)

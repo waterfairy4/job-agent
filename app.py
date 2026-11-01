@@ -145,10 +145,17 @@ for i, m in enumerate(messages):
                                        mime="application/pdf" if pdf else
                                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
+if messages:  # after every answer, show the newest message instead of the top of the page
+    theme.scroll_to_bottom(st, len(messages))
+
+
 def run(**kwargs):
     if demo_limit is not None and ss.get("demo_owner_key") and "message" in kwargs and not demo_limit.use():
         st.warning("The demo's daily limit is used up. Enter your own DeepSeek API key in the sidebar.")
         return
+    if "message" in kwargs:  # show the message at once, not only after the agent has answered
+        st.chat_message("user", avatar=ui["user"]).markdown(kwargs["message"])
+        theme.scroll_to_bottom(st, f"sending-{len(messages)}")
     with st.spinner(ui["thinking"]):
         out = step(graph, ss.thread, **kwargs)
     ss.pending = out["pending"]
