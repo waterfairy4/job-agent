@@ -18,4 +18,6 @@ COPY . .
 RUN chmod -R a+rwX /app
 
 EXPOSE 7860
-CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0", "--server.headless=true"]
+# The host shows the app inside its own page (another domain), so Streamlit's origin checks must be off,
+# or the browser connection is refused and the page stays on the grey loading boxes.
+CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
