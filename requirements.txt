@@ -1,24 +1,13 @@
 langchain-core>=1.0
 langgraph>=1.0
-langgraph-checkpoint-sqlite>=2.0   # conversations survive a restart
 langchain-openai>=1.0
 langchain-chroma>=1.0
 langchain-text-splitters>=1.0
-langchain-huggingface>=1.0   # local embeddings
-sentence-transformers>=3.0   # needed by langchain-huggingface; installs PyTorch (~1-2 GB)
+langchain-huggingface>=1.0   # local embeddings; installs PyTorch (~1-2 GB)
 chromadb>=1.0
 rank_bm25>=0.2
 pypdf>=4.0
-typst>=0.13                   # one-page PDF CV
-python-docx>=1.1              # editable Word copy of the CV
-Pillow>=10.0                  # photo/logo from the CV PDF
-httpx>=0.27                   # web access
-trafilatura>=2.0              # main text of a web page
-beautifulsoup4>=4.12          # fallback text extraction
-# Optional, for job pages that need JavaScript: pip install playwright && playwright install chromium
 python-dotenv>=1.0
 streamlit>=1.40
-fastapi>=0.110                # HTTP API: uvicorn jobagent.api:app
-uvicorn>=0.29
 pandas>=2.0
 pytest>=8.0
