@@ -115,20 +115,26 @@ class ProfileIndex:
     def size(self) -> int:
         return len(self.vs.get(include=[])["ids"])
 
-    def search(self, query: str, k: int = config.TOP_K) -> list[Document]:
-        """Hybrid search with Reciprocal Rank Fusion: score = sum of 1 / (60 + rank)."""
+    MODES = ("hybrid", "dense", "bm25")
+
+    def search(self, query: str, k: int = config.TOP_K, mode: str = "hybrid") -> list[Document]:
+        """Hybrid search with Reciprocal Rank Fusion: score = sum of 1 / (60 + rank).
+        mode="dense" or "bm25" uses one retriever alone (for comparing them in evaluation)."""
         bm25 = self._load_bm25()
         if bm25 is None:
             raise RuntimeError("Profile index is empty. Add files to profile/ and run: python ingest.py")
-        pool = k * 3
+        if mode not in self.MODES:
+            raise ValueError(f"mode must be one of {self.MODES}")
+        pool = k * 3 if mode == "hybrid" else k
         rankings = []
 
-        dense = self.vs.similarity_search(query, k=min(pool, len(self._chunks)))
-        rankings.append([d.metadata["chunk_id"] for d in dense])
-
-        scores = bm25.get_scores(tokenize(query))
-        order = sorted(range(len(scores)), key=lambda i: -scores[i])
-        rankings.append([self._chunks[i].metadata["chunk_id"] for i in order[:pool] if scores[i] > 0])
+        if mode in ("hybrid", "dense"):
+            dense = self.vs.similarity_search(query, k=min(pool, len(self._chunks)))
+            rankings.append([d.metadata["chunk_id"] for d in dense])
+        if mode in ("hybrid", "bm25"):
+            scores = bm25.get_scores(tokenize(query))
+            order = sorted(range(len(scores)), key=lambda i: -scores[i])
+            rankings.append([self._chunks[i].metadata["chunk_id"] for i in order[:pool] if scores[i] > 0])
 
         fused: dict[str, float] = {}
         for ranking in rankings:

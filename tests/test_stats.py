@@ -21,11 +21,11 @@ def test_routing_versions_rebuilt_from_reports(tmp_path):
                                  ["Hi", "none", ""]])
     (tmp_path / "routing-v1.md").write_text("# R\n\n## Wrong routes\n\n| Message | Expected | Got |\n| --- | --- | --- |\n"
                                             "| 帮我分析一下这个岗位 | analyze_job | none |\n", encoding="utf-8")
-    (tmp_path / "routing-v2.md").write_text("# R\n\nall right\n", encoding="utf-8")
+    (tmp_path / "routing-v2.md").write_text("# R\n\n1 test messages. all right\n", encoding="utf-8")
     v1, v2 = load_routing_run(tmp_path, "v1"), load_routing_run(tmp_path, "v2")
-    assert v1 == {"帮我分析一下这个岗位": False, "Hi": True} and all(v2.values())
+    assert v1 == {"帮我分析一下这个岗位": False, "Hi": True} and v2 == {"帮我分析一下这个岗位": True}  # 1 case then
     md = compare_routing(v1, v2, "v1", "v2")
-    assert "fixed 1, broke 0; p = 1.000" in md and "Not statistically significant" in md
+    assert "fixed 1, broke 0; p = 1.000" in md and "(paired, 1 messages)" in md and "Not statistically" in md
 
 
 def test_judge_versions_rebuilt_from_reports(tmp_path):

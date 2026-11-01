@@ -215,3 +215,33 @@ def test_objective_may_be_reworded_and_paragraph_sections(tmp_path):
     assert [e.title for e in cv.sections[2].entries] == ["语言：", "荣誉："]
     _, pages = render_pdf(cv, tmp_path / "cv.pdf")
     assert pages == 1
+
+
+def test_structured_output_retries_when_the_model_returns_nothing():
+    import pytest
+
+    from jobagent.llm import structured
+    from jobagent.schemas import CVScore
+
+    answers = [None, None, CVScore(relevance=4, clarity=3, reason="ok")]
+
+    class Flaky:
+        def with_structured_output(self, schema, **kw):
+            return type("R", (), {"invoke": lambda self, p: answers.pop(0)})()
+
+    assert structured(Flaky(), CVScore).invoke("x").relevance == 4
+    answers[:] = [None, None, None]
+    with pytest.raises(RuntimeError, match="did not return a valid CVScore after 3 tries"):
+        structured(Flaky(), CVScore).invoke("x")
+
+
+def test_dropped_language_is_put_back_word_for_word():
+    from jobagent.cvdoc import cv_plain_text, restore_languages
+
+    source = "语言与荣誉\n语言：土耳其语（母语）· 英语（专业工作水平）· 韩语（会话水平）。荣誉：北京市政府奖学金。"
+    cv = CVDocument(name="X", sections=[CVSection(title="语言与荣誉", layout="text", entries=[
+        CVEntry(title="语言：", bullets=["土耳其语（母语）· 英语（专业工作水平）。"]),
+        CVEntry(title="荣誉：", bullets=["北京市政府奖学金。"])])])
+    assert restore_languages(cv, source) == ["韩语"]
+    assert cv.sections[0].entries[0].bullets == ["土耳其语（母语）· 英语（专业工作水平） · 韩语（会话水平）。"]
+    assert restore_languages(cv, source) == [] and "韩语（会话水平）" in cv_plain_text(cv)

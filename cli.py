@@ -27,7 +27,8 @@ def read_job() -> str:
 
 def main():
     graph, index, store = create()
-    thread = new_thread()
+    thread = store.last_thread() or new_thread()  # conversations are saved, so continue the last one
+    store.set_last_thread(thread)
     print(f"Job agent ready ({index.size()} profile chunks). Commands: /job /jobs /new /quit")
     while True:
         text = input("\nYou: ").strip()
@@ -35,11 +36,16 @@ def main():
             break
         if text == "/new":
             thread = new_thread()
+            store.set_last_thread(thread)
             print("New conversation.")
             continue
         if text == "/jobs":
             for r in store.tracker():
-                print(f"  {r['id']}  {str(r['score'] or '–'):>4}%  {r['status']:<10} {r['company']} – {r['title']}")
+                dates = f"saved {r.get('saved_on') or r.get('updated', '')}"
+                if r.get("applied_on"):
+                    dates += f", applied {r['applied_on']}"
+                print(f"  {r['id']}  {str(r['score'] or '–'):>4}%  {r['status']:<10} "
+                      f"{r['company'] or 'Unknown company'} – {r['title']}  ({dates})")
             continue
         if text == "/job":
             text = read_job()

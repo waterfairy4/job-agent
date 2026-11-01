@@ -1,5 +1,16 @@
+# Secrets and personal data: never on GitHub
 .env
-.venv/
-__pycache__/
 data/
 profile/
+eval/cv_blind/
+eval/cv_ratings.csv
+*.sqlite
+
+# Stock background image: license does not allow redistribution (the app falls back to a gradient)
+assets/background.jpg
+
+# Python and tools
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc

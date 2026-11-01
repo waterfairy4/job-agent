@@ -1,0 +1,9 @@
+.git
+.env
+data/
+profile/
+eval/cv_blind/
+eval/cv_ratings.csv
+assets/background.jpg
+__pycache__/
+.pytest_cache/
