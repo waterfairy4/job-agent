@@ -1,7 +1,7 @@
 # Secrets and personal data: never on GitHub
 .env
-data/
-profile/
+/data/
+/profile/
 eval/cv_blind/
 eval/cv_ratings.csv
 *.sqlite
