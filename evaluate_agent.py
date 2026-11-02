@@ -58,7 +58,8 @@ def retrieval(version: str):
     res = evaluate_retrieval(index, cases, k=config.MATCH_TOP_K)
     text = retrieval_markdown(res)
     (EVAL / f"retrieval-{version}.md").write_text(text, encoding="utf-8")
-    settings = f"{res['chunks']} chunks, chunk size {config.CHUNK_SIZE}, {config.EMBED_MODEL}"
+    settings = (f"{res['chunks']} chunks, chunk size {config.CHUNK_SIZE}, {config.EMBED_MODEL}, "
+                f"section chunks {'on' if config.SECTION_CHUNKS else 'off'}")
     for mode, m in res["modes"].items():
         log(version, f"recall@{res['k']}_{mode}", m["recall"], settings)
     print(text)

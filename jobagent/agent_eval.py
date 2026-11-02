@@ -83,8 +83,11 @@ def _squash(text: str) -> str:
 
 
 def relevant_ids(chunks: list, phrases: list[str]) -> set[str]:
+    from jobagent.rag import chunk_body
+
+    # the chunk's own text only: a section name added at its start must not make it "relevant"
     return {c.metadata["chunk_id"] for c in chunks
-            if any(_squash(p) in _squash(c.page_content) for p in phrases)}
+            if any(_squash(p) in _squash(chunk_body(c)) for p in phrases)}
 
 
 def evaluate_retrieval(index, cases: list[dict], k: int = 5, modes=("bm25", "dense", "hybrid")) -> dict:

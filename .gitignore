@@ -14,3 +14,8 @@ assets/background.jpg
 __pycache__/
 .pytest_cache/
 *.pyc
+
+# Android build output
+android/.gradle/
+android/build/
+

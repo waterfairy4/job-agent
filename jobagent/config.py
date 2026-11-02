@@ -16,6 +16,9 @@ CV_FILE = os.getenv("CV_FILE", "")
 # Chunking (characters; works for Chinese and English)
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "600"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "100"))
+# Optional: cut files at their section titles first and start each chunk with its section name.
+# Off by default: on 28 retrieval queries it did not help (hybrid MRR 0.964 both ways, recall@5 87.8% -> 82.3%).
+SECTION_CHUNKS = os.getenv("SECTION_CHUNKS", "0") in ("1", "true", "yes")
 
 # Embeddings (runs locally, free). bge-m3 is multilingual (~2 GB).
 # Quick English-only test: EMBED_MODEL=BAAI/bge-small-en-v1.5

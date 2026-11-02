@@ -40,20 +40,92 @@ def load_documents(folder: str = config.PROFILE_DIR) -> list[Document]:
     return docs
 
 
-def split_documents(docs: list[Document]) -> list[Document]:
+# Section titles of a CV or paper (PDF text has no markdown "#"): a short line that is only one of these.
+SECTION_WORDS = (
+    "求职意向", "个人简介", "教育经历", "教育背景", "项目经历", "科研经历", "研究经历", "实习经历", "工作经历",
+    "专业技能", "技术能力", "技能", "论文", "发表论文", "出版物", "语言", "语言与荣誉", "荣誉", "获奖", "奖项",
+    "objective", "summary", "education", "experience", "work experience", "research experience", "projects",
+    "publications", "skills", "technical skills", "languages", "honors", "awards",
+    "abstract", "introduction", "related work", "method", "methods", "experiments", "results", "discussion",
+    "conclusion", "conclusions", "limitations", "references", "appendix")
+MD_HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
+# a numbered English paper heading, "3.2 Hybrid Retrieval" (not "2023 年 7 月" or "3 个发送端")
+NUMBERED = re.compile(r"^(\d{1,2}(?:\.\d{1,2}){0,2})\.?\s+([A-Z][A-Za-z-]*(?:\s+[A-Za-z][A-Za-z:-]*){0,8})$")
+
+
+def _heading(line: str) -> tuple[int, str] | None:
+    """(level, title) if the line is a section title, else None."""
+    s = line.strip()
+    m = MD_HEADING.match(s)
+    if m:
+        return len(m.group(1)), m.group(2).strip()
+    bare = s.rstrip("：:").strip()
+    if 0 < len(bare) <= 24 and bare.lower() in SECTION_WORDS:
+        return 2, bare
+    m = NUMBERED.match(s)
+    if m and not s.endswith(("。", ".", "，", ",", "；", ";")):
+        return 2 + m.group(1).count("."), s
+    return None
+
+
+def split_sections(text: str) -> list[tuple[str, str]]:
+    """Cut a text at its section titles. Returns (section name, text) pairs; the text keeps its title line.
+    The name is the nearest title below the document's own title (a "# " heading over the whole file)."""
+    sections, path, buf = [], {}, []
+
+    def flush():
+        body = "\n".join(buf).strip()
+        if body:
+            levels = sorted(path)
+            # skip a lone level-1 file title when a deeper heading exists ("# My profile" > "## Job Agent")
+            names = [path[lv] for lv in levels if not (lv == 1 and len(levels) > 1)]
+            sections.append((" › ".join(names[-2:]), body))
+
+    for line in text.splitlines():
+        h = _heading(line)
+        if h:
+            flush()
+            buf = []
+            level, title = h
+            path = {lv: name for lv, name in path.items() if lv < level}
+            path[level] = title
+        buf.append(line)
+    flush()
+    return sections
+
+
+def split_documents(docs: list[Document], by_section: bool | None = None) -> list[Document]:
+    """Chunks of about CHUNK_SIZE characters. With SECTION_CHUNKS (optional, off by default), a document is first cut at its
+    section titles, so a chunk never mixes two projects, and each chunk starts with its section name
+    ("【求职智能体（Job Agent）】"), which helps both BM25 and the embeddings and names the project in citations."""
+    by_section = config.SECTION_CHUNKS if by_section is None else by_section
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=config.CHUNK_SIZE,
         chunk_overlap=config.CHUNK_OVERLAP,
         separators=SEPARATORS,
         keep_separator="end",  # "。" stays with its own sentence
     )
-    chunks = splitter.split_documents(docs)
+    chunks = []
+    for doc in docs:
+        if not by_section:
+            chunks += splitter.split_documents([doc])
+            continue
+        for name, text in split_sections(doc.page_content):
+            prefix = f"【{name}】\n" if name else ""
+            for piece in splitter.split_text(text):
+                meta = {**doc.metadata, "section": name, "prefix_len": len(prefix)}
+                chunks.append(Document(page_content=prefix + piece, metadata=meta))
     counters: dict[tuple, int] = {}
     for c in chunks:
         key = (c.metadata["source"], c.metadata["page"])
         counters[key] = counters.get(key, 0) + 1
         c.metadata["chunk_id"] = f"{key[0]}#p{key[1]}#c{counters[key]}"
     return chunks
+
+
+def chunk_body(chunk: Document) -> str:
+    """The chunk's own text, without the section name added at its start."""
+    return chunk.page_content[int(chunk.metadata.get("prefix_len", 0) or 0):]
 
 
 # ---------- BM25 tokenizer ----------
