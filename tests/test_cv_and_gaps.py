@@ -278,3 +278,12 @@ def test_gap_plan_prompt_forbids_upgrading_experience():
 
     for phrase in ("Never upgrade it", "pilot", "users", "measure X first", "A portfolio demo stays a demo"):
         assert phrase in GAP_PROMPT
+
+
+def test_bullet_dot_copied_from_cv_is_removed():
+    from jobagent.cvdoc import normalize_layout
+    from jobagent.schemas import CVDocument, CVEntry, CVSection
+    cv = CVDocument(name="X", sections=[CVSection(title="项目经历", entries=[
+        CVEntry(title="求职智能体", bullets=["·用 Python 设计评估流程", "• 自建 55 条评测集", "部署到魔搭"])])])
+    normalize_layout(cv)
+    assert cv.sections[0].entries[0].bullets == ["用 Python 设计评估流程", "自建 55 条评测集", "部署到魔搭"]

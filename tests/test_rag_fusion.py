@@ -63,3 +63,21 @@ def test_default_mode_follows_the_setting(index, monkeypatch):
     monkeypatch.setattr(config, "RERANK", True)
     index.search("LoRA", k=2)
     assert len(index.calls) == 1
+
+
+def test_degree_items_always_get_the_education_section(tmp_path):
+    from jobagent.tools import evidence_hits
+    folder = tmp_path / "profile"
+    folder.mkdir()
+    (folder / "skills.md").write_text("实验设计与统计分析；数据科学工具 pandas、NumPy；computer science basics.", encoding="utf-8")
+    (folder / "edu.md").write_text("## 教育背景 / Education\n北京大学，计算机科学与技术，硕士，2024–2027，GPA 3.66。", encoding="utf-8")
+    (folder / "other.md").write_text("Kubernetes autoscaling and Prometheus monitoring.", encoding="utf-8")
+    idx = ProfileIndex(HashEmbeddings(), persist_dir=str(tmp_path / "chroma"))
+    idx.build(str(folder))
+    item = "Major in applied statistics, data science, computer science, AI or related field"
+    hits = evidence_hits(idx, item + " 应用统计 数据科学", item, k=2)
+    assert any("计算机科学与技术，硕士" in h.page_content for h in hits)
+    assert len(hits) == 2
+    # other items are searched as before
+    plain = evidence_hits(idx, "Prometheus monitoring", "Prometheus monitoring", k=2)
+    assert [h.page_content for h in plain] == [h.page_content for h in idx.search("Prometheus monitoring", k=2)]

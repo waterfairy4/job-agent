@@ -398,6 +398,10 @@ def normalize_layout(cv) -> None:
     """Objective and Languages & Honors are plain paragraphs (no bullet dots), entry titles are bold
     labels ending in '：', like the original CV."""
     for sec in cv.sections:
+        if sec.layout not in ("text", "table"):
+            # The PDF and Word copy draw their own bullet dot; a dot copied from the CV text gave "· ·".
+            for e in sec.entries:
+                e.bullets = [re.sub(r"^\s*[·•●▪◦\-–]\s*", "", b) for b in e.bullets]
         if sec.layout != "table" and any(k in sec.title.lower() for k in PARAGRAPHS):
             sec.layout = "text"
         if sec.layout in ("text", "table"):

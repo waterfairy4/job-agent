@@ -306,6 +306,24 @@ def search_query(job: dict, item: str, llm, expand: bool) -> str:
     return item + " " + " ".join(cache[item])
 
 
+# Degree / major items: the general search ranks skill lists that mention "统计" or "computer" above the
+# education section, so the match said "only a software-engineering bachelor's". Such items also get the
+# education chunks, found by a query in the words an education section is written in.
+EDUCATION_ITEM = re.compile(r"degree|bachelor|master|ph\.?d|major|graduat|学历|学位|本科|硕士|博士|专业|毕业",
+                            re.IGNORECASE)
+EDUCATION_QUERY = "教育背景 教育经历 Education 大学 University 硕士 学士 Master Bachelor 专业 GPA"
+
+
+def evidence_hits(index: ProfileIndex, query: str, item: str, k: int) -> list:
+    hits = index.search(query, k=k)
+    if EDUCATION_ITEM.search(item):
+        seen = {h.metadata.get("chunk_id") for h in hits}
+        extra = [h for h in index.search(EDUCATION_QUERY, k=2, mode="bm25")
+                 if h.metadata.get("chunk_id") not in seen]
+        hits = extra + hits[:max(k - len(extra), 1)]
+    return hits
+
+
 def run_match(job: dict, index: ProfileIndex, store: JobStore, llm,
               expand: bool | None = None, top_k: int | None = None):
     """Judge every item of an analyzed job; save results and a report. Returns (score, report path, results)."""
@@ -314,7 +332,7 @@ def run_match(job: dict, index: ProfileIndex, store: JobStore, llm,
     judge = structured(llm, Verdict)
     results = []
     for req in job["analysis"]["requirements"]:
-        hits = index.search(search_query(job, req["text"], llm, expand), k=top_k)
+        hits = evidence_hits(index, search_query(job, req["text"], llm, expand), req["text"], top_k)
         kind = "responsibility" if req["type"] == "duty" else "qualification"
         v: Verdict = judge.invoke(JUDGE_PROMPT.format(kind=kind, req=req["text"], evidence=format_hits(hits)))
         refs = _valid_refs(v.evidence, len(hits))
@@ -404,6 +422,12 @@ def _preferences() -> str:
 def _cjk_share(text: str) -> float:
     letters = [c for c in text if not c.isspace() and not c.isdigit()]
     return len(CJK.findall("".join(letters))) / max(len(letters), 1)
+
+
+def _is_chinese(text: str) -> bool:
+    """Mostly Chinese? An English text with a few Chinese names stays far below 0.2; a Chinese CV with many
+    English technical terms stays far above it."""
+    return _cjk_share(text) >= 0.2
 
 
 NOW = ("至今", "现在", "present", "now", "current")
@@ -822,7 +846,9 @@ def build_tools(index: ProfileIndex, store: JobStore, llm, cv_llm=None) -> list:
 
     def ats_report(job: dict, cv) -> list[str]:
         """ATS keyword check on the finished CV; adds only terms the user's own documents show."""
-        if abs(_cjk_share(cv_plain_text(cv)) - _cjk_share(job["text"])) > 0.3:
+        # Compare the language, not the exact share: a Chinese CV full of English tool names (Python,
+        # LangGraph) is ~65% Chinese characters while a Chinese posting is ~95%.
+        if _is_chinese(cv_plain_text(cv)) != _is_chinese(job["text"]):
             return ["ATS keyword check skipped: the CV and the posting are in different languages."]
         try:
             terms = ats_terms(job, llm)

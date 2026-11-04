@@ -84,3 +84,12 @@ def test_build_cv_adds_supported_keywords_and_reports_the_rest(env, monkeypatch,
     assert saved.sections[1].entries[-1].title == "关键词"
     assert saved.sections[1].entries[-1].bullets == ["Python、评分标准"]
     assert "Kubernetes" not in saved.model_dump_json()                                     # never added
+
+
+def test_chinese_cv_with_english_terms_counts_as_chinese():
+    from jobagent.tools import _is_chinese
+    cv = ("求职智能体（Job Agent）：基于 LangGraph 构建 ReAct 智能体，BM25 + bge-m3 混合检索，"
+          "Python、PyTorch、Hugging Face Transformers、PEFT/TRL、pandas/NumPy/SciPy、Docker、Linux、Git")
+    assert _is_chinese(cv)
+    assert _is_chinese("【实习】大模型评测实习生 参与大模型评测体系的设计与优化，熟练使用Python进行数据处理。")
+    assert not _is_chinese("LLM Evaluation Intern at Meituan (美团), Beijing. Python, data analysis, LLM-as-a-judge.")
