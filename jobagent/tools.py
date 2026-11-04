@@ -23,7 +23,7 @@ from jobagent.cvdoc import (CJK, OBJECTIVE, added_runs, cv_plain_text, cv_text, 
                             find_images, normalize_layout, restore_languages,
                             missing_languages, render_docx, unknown_numbers, visual_length)
 from jobagent.cvpdf import render_pdf
-from jobagent.schemas import (CompanyBrief, CVCritique, CVDocument, CVDraft, GapPlan, JobAnalysis,
+from jobagent.schemas import (ATSTerms, CompanyBrief, CVCritique, CVDocument, CVDraft, GapPlan, JobAnalysis,
                               JobCandidates, SearchPlan, SearchTerms, Verdict)
 from jobagent.store import JobStore
 
@@ -94,7 +94,8 @@ CV_RULES = """Rules:
 - Only the objective line (求职意向/Objective) may be shortened or reworded, using the CV's own words.
 - Never add any fact, skill, tool, number, date, title, goal or name that is not in the CV.
 - Never remove the Languages or Honors items. Keep every number exactly as written.
-- Copy the name and contact details exactly."""
+- Copy the name and contact details exactly.
+- Copy every date exactly as written (keep "2026 年"; do not shorten it to "2026")."""
 
 BUILD_CV_PROMPT = """Tailor the candidate's CV for this job, in {language}.
 You may: reorder sections, entries and bullets so the most relevant come first; shorten the objective;
@@ -209,6 +210,71 @@ Candidate's background (excerpts):
 
 Gaps:
 {gaps}"""
+
+
+ATS_PROMPT = """List the key terms an applicant tracking system (ATS) would search for in CVs for this job.
+Copy each term EXACTLY as the posting writes it (same language and characters): skills, tools, methods and
+task words (e.g. 大模型评测, 评测指标, Python, 数据分析). 8-20 terms, most important first.
+Leave out degrees, majors, years of experience, soft skills, company or team names, locations and dates.
+
+Job posting:
+{job}"""
+
+
+def ats_contains(text: str, term: str) -> bool:
+    """Is `term` in `text`? English terms match whole words ("AI" is not in "OpenAI"); Chinese terms ignore spaces."""
+    term = term.strip().lower()
+    if not term:
+        return False
+    if term.isascii():
+        norm = " ".join(text.lower().split())
+        pattern = r"(?<![a-z0-9])" + re.escape(" ".join(term.split())) + r"(?![a-z0-9])"
+        return re.search(pattern, norm) is not None
+    return "".join(term.split()) in "".join(text.lower().split())
+
+
+def ats_terms(job: dict, llm) -> list[str]:
+    """The posting's key terms, each checked to really occur in the posting (cached in the job file)."""
+    if "ats_terms" not in job:
+        raw = structured(llm, ATSTerms).invoke(ATS_PROMPT.format(job=job["text"][:6000])).terms
+        seen, kept = set(), []
+        for term in raw:
+            term = term.strip(" ，,。；;、:：")
+            if len(term) >= 2 and term.lower() not in seen and ats_contains(job["text"], term):
+                seen.add(term.lower())
+                kept.append(term)
+        job["ats_terms"] = kept[:20]
+    return job["ats_terms"]
+
+
+def ats_check(terms: list[str], cv_text: str, chunks) -> dict:
+    """Which terms the CV has; which missing ones the user's documents show (term -> source); which neither."""
+    present = [t for t in terms if ats_contains(cv_text, t)]
+    supported, unsupported = {}, []
+    for term in terms:
+        if term in present:
+            continue
+        src = next((c.metadata.get("source", "profile") for c in chunks if ats_contains(c.page_content, term)), None)
+        if src:
+            supported[term] = src
+        else:
+            unsupported.append(term)
+    return {"terms": terms, "present": present, "supported": supported, "unsupported": unsupported}
+
+
+def add_keywords(cv, terms: list[str]) -> str:
+    """Add the terms as one row of the skills table (a new table section if the CV has none). Returns the label."""
+    from jobagent.schemas import CVEntry, CVSection
+
+    chinese = CJK.search(cv_plain_text(cv)) is not None
+    label, sep = ("关键词", "、") if chinese else ("Keywords", ", ")
+    entry = CVEntry(title=label, bullets=[sep.join(terms)])
+    table = next((sec for sec in cv.sections if sec.layout == "table"), None)
+    if table:
+        table.entries.append(entry)
+    else:
+        cv.sections.append(CVSection(title="技能" if chinese else "Skills", layout="table", entries=[entry]))
+    return label
 
 
 def _valid_refs(refs, n: int) -> list[int]:
@@ -719,6 +785,7 @@ def build_tools(index: ProfileIndex, store: JobStore, llm, cv_llm=None) -> list:
             return ("Could not tell which file in profile/ is the CV. Name it with 'cv' or 'resume', "
                     "or set CV_FILE in .env.")
         result = run_build_cv(job, cv_text(cv_path), cv_llm, language)
+        ats_lines = ats_report(job, result["cv"]) if config.CV_ATS_KEYWORDS else []
         images = find_images(cv_path, out_dir=store.root / "assets")
         # the CV as data too, for the CV quality evaluation (evaluate_cv.py)
         (store.reports_dir / f"{job['id']}-cv.json").write_text(
@@ -749,8 +816,33 @@ def build_tools(index: ProfileIndex, store: JobStore, llm, cv_llm=None) -> list:
             msg.append("CHECK: these languages from the original CV are missing: " + ", ".join(result["languages"]))
         if pages > 1:
             msg.append("It did not fit on one page even at the smallest size: ask to leave out a project.")
+        msg += ats_lines
         msg.append("The user should review the PDF before sending it.")
         return "\n".join(msg)
+
+    def ats_report(job: dict, cv) -> list[str]:
+        """ATS keyword check on the finished CV; adds only terms the user's own documents show."""
+        if abs(_cjk_share(cv_plain_text(cv)) - _cjk_share(job["text"])) > 0.3:
+            return ["ATS keyword check skipped: the CV and the posting are in different languages."]
+        try:
+            terms = ats_terms(job, llm)
+            store.put(job)
+        except Exception:
+            return ["ATS keyword check skipped: the model did not return the posting's key terms."]
+        if not terms:
+            return []
+        index._load_bm25()
+        chk = ats_check(terms, cv_plain_text(cv), index._chunks)
+        lines = [f"ATS keywords: {len(chk['present'])} of {len(terms)} key terms of the posting are in the CV"
+                 + (f" ({', '.join(chk['present'][:12])})." if chk["present"] else ".")]
+        if chk["supported"]:
+            label = add_keywords(cv, list(chk["supported"]))
+            lines.append(f"ATS: added to the skills table as '{label}', because your documents show them: "
+                         + "; ".join(f"{t} ({src})" for t, src in chk["supported"].items()))
+        if chk["unsupported"]:
+            lines.append("ATS: not added, not found in your documents (add them only if true): "
+                         + ", ".join(chk["unsupported"]))
+        return lines
 
     @tool
     def plan_gaps(job_id: str) -> str:

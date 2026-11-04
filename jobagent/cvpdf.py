@@ -29,6 +29,7 @@ TEMPLATE = r"""
 #set par(leading: 0.62em, spacing: 0.62em * s, justify: false)
 #show strong: set text(font: boldf, weight: "bold")
 
+#let ats = sys.inputs.at("ats", default: "0") == "1"
 #let photo = sys.inputs.at("photo", default: "")
 #let logo = sys.inputs.at("logo", default: "")
 #grid(
@@ -59,7 +60,10 @@ TEMPLATE = r"""
 
 #for sec in cv.sections {
   section(sec.title)
-  if sec.at("layout", default: "entries") == "table" {
+  if sec.at("layout", default: "entries") == "table" and ats {
+    // ATS layout: "label：values" on one line, so a parser keeps the label with its values
+    for e in sec.entries { par(strong(e.title + "：") + e.bullets.join("；")) }
+  } else if sec.at("layout", default: "entries") == "table" {
     grid(
       columns: (2.5cm, 1fr), row-gutter: 6pt * s, column-gutter: 4pt,
       ..sec.entries.map(e => (strong(e.title), e.bullets.join("；"))).flatten(),
@@ -73,12 +77,27 @@ TEMPLATE = r"""
     }
   } else {
     for e in sec.entries {
-      if e.at("title", default: "") != "" or e.at("date", default: "") != "" {
-        v(3pt * s)
-        two(e.at("title", default: ""), e.at("date", default: ""), bold: true)
-      }
-      if e.at("subtitle", default: "") != "" or e.at("meta", default: "") != "" {
-        two(e.at("subtitle", default: ""), e.at("meta", default: ""))
+      let title = e.at("title", default: "")
+      let date = e.at("date", default: "")
+      let sub = e.at("subtitle", default: "")
+      let meta = e.at("meta", default: "")
+      if ats {
+        // ATS layout: date and GPA on the same line as the school or project, not in a separate column
+        if title != "" or date != "" {
+          v(3pt * s)
+          par(strong(title) + (if title != "" and date != "" { " · " } else { "" }) + date)
+        }
+        if sub != "" or meta != "" {
+          par(sub + (if sub != "" and meta != "" { " · " } else { "" }) + meta)
+        }
+      } else {
+        if title != "" or date != "" {
+          v(3pt * s)
+          two(title, date, bold: true)
+        }
+        if sub != "" or meta != "" {
+          two(sub, meta)
+        }
       }
       for b in e.at("bullets", default: ()) {
         pad(left: 0.75em, top: 1pt * s, grid(columns: (0.75em, 1fr), [·], b))
@@ -102,14 +121,17 @@ def _pages(pdf: bytes) -> int:
     return len(PdfReader(io.BytesIO(pdf)).pages)
 
 
-def render_pdf(cv, path: Path, photo: Path | None = None, logo: Path | None = None) -> tuple[Path, int]:
-    """Write the CV as a PDF, scaled to fit one page if possible. Returns (path, number of pages)."""
+def render_pdf(cv, path: Path, photo: Path | None = None, logo: Path | None = None,
+               ats: bool | None = None) -> tuple[Path, int]:
+    """Write the CV as a PDF, scaled to fit one page if possible. Returns (path, number of pages).
+    `ats`: the ATS-friendly layout (default: config.CV_ATS_LAYOUT)."""
     import typst
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         (tmp / "cv.typ").write_text(_template(), encoding="utf-8")
-        inputs = {"cv": cv.model_dump_json()}
+        ats = config.CV_ATS_LAYOUT if ats is None else ats
+        inputs = {"cv": cv.model_dump_json(), "ats": "1" if ats else "0"}
         for name, src in (("photo", photo), ("logo", logo)):
             if src:
                 dst = tmp / f"{name}{Path(src).suffix.lower()}"

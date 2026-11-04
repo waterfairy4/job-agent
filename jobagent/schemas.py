@@ -131,3 +131,8 @@ class GapPlan(BaseModel):
 class CVDraft(BaseModel):
     bullets: list[CVBullet]
     keywords: list[str] = Field(description="Words from the job posting worth using in the CV")
+
+
+class ATSTerms(BaseModel):
+    terms: list[str] = Field(description="8-20 key terms copied exactly from the posting (skills, tools, methods, "
+                                         "task words), most important first")

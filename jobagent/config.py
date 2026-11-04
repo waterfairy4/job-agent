@@ -62,6 +62,12 @@ CV_FONT_CJK = os.getenv("CV_FONT_CJK", "SimSun")
 CV_FONT_DIR = os.getenv("CV_FONT_DIR", "")
 # Your standing CV rules (e.g. "keep Korean", "never add words to my bullets"), read by build_cv
 CV_PREFERENCES_FILE = os.getenv("CV_PREFERENCES_FILE", "cv_preferences.md")
+# Applicant tracking systems (ATS): build_cv lists the posting's key terms, and adds to the skills table the
+# missing ones that your own documents show (never others). 0 = report only, never add.
+CV_ATS_KEYWORDS = os.getenv("CV_ATS_KEYWORDS", "1") not in ("0", "false", "no")
+# ATS-friendly PDF layout: dates and GPA on the same line as the school or project (not right-aligned),
+# skills as "label: values" lines, so parsers keep them together. Off = the classic layout.
+CV_ATS_LAYOUT = os.getenv("CV_ATS_LAYOUT", "0") in ("1", "true", "yes")
 
 # App look: "cute" (pink, background picture) or "plain"
 APP_THEME = os.getenv("APP_THEME", "cute").lower()

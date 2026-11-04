@@ -123,6 +123,10 @@ so add skills and projects that are not on your CV to `profile/projects.md`.
   4. **Order and honesty**: entries are put back newest-first like your CV, and the reply says whether the
      objective really changed (checked in code, so the agent cannot claim changes that did not happen).
   5. **One page**: the PDF layout shrinks step by step until it fits (Typst, no Word/WPS needed).
+  6. **ATS check**: lists the posting's key terms (each checked to occur in the posting), reports which are in
+     the CV, and adds to the skills table ("关键词" / "Keywords") only the missing terms your own documents show,
+     naming the file for each; the rest are reported, never added (`CV_ATS_KEYWORDS=0` = report only).
+     `CV_ATS_LAYOUT=1` puts dates and GPA on the same line as the school or project, so parsers keep them together.
   Your standing rules live in `cv_preferences.md` (e.g. "keep Korean"); edit it in your own words.
   Photo and logo are taken from your CV PDF, or put `photo.jpg` / `logo.png` in `profile/`.
   Optional: `CV_MODEL=deepseek-v4-pro` in `.env` uses a stronger model only for writing the CV.

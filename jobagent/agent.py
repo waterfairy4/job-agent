@@ -40,7 +40,8 @@ Workflow:
 - Call build_cv when the user wants a CV / resume for a job ("update my CV", "make me a CV").
   It makes a one-page PDF and an editable Word copy. Pass language="Chinese" or "English" if the user
   asks for one. Describe changes only from the tool's lines (e.g. if it says the objective is unchanged,
-  do not say it was reworded) and repeat every CHECK line.
+  do not say it was reworded), repeat every CHECK line, and report the ATS lines (which
+  key terms are in the CV, which were added and why, which were not added).
 - Call plan_gaps when the user asks how to close gaps or what to do to fit a job better.
 - Call save_job only when the user wants to save or track a job, or reports progress on one (applied,
   interview, offer, rejected); the user will be asked to approve. Pass cv_version ("tailored" or
