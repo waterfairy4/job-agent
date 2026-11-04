@@ -154,7 +154,9 @@ def default_embeddings():
 
 
 class ProfileIndex:
-    def __init__(self, embeddings=None, persist_dir: str | None = None):
+    def __init__(self, embeddings=None, persist_dir: str | None = None, reranker=None):
+        """`reranker`: a function (query, list of texts) -> list of scores; None = the cross-encoder in
+        config.RERANK_MODEL, loaded only when a reranked search is first made."""
         from langchain_chroma import Chroma
 
         self.vs = Chroma(
@@ -165,6 +167,7 @@ class ProfileIndex:
         )
         self._bm25 = None
         self._chunks: list[Document] = []
+        self._reranker = reranker
 
     def build(self, folder: str = config.PROFILE_DIR) -> int:
         """Rebuild from scratch, so deleted or edited files never leave stale chunks."""
@@ -187,35 +190,68 @@ class ProfileIndex:
     def size(self) -> int:
         return len(self.vs.get(include=[])["ids"])
 
-    MODES = ("hybrid", "dense", "bm25")
+    MODES = ("hybrid", "dense", "bm25", "rerank")
 
-    def search(self, query: str, k: int = config.TOP_K, mode: str = "hybrid") -> list[Document]:
-        """Hybrid search with Reciprocal Rank Fusion: score = sum of 1 / (60 + rank).
-        mode="dense" or "bm25" uses one retriever alone (for comparing them in evaluation)."""
+    def search(self, query: str, k: int = config.TOP_K, mode: str | None = None,
+               bm25_weight: float | None = None) -> list[Document]:
+        """Hybrid search with weighted Reciprocal Rank Fusion: score = sum of weight / (60 + rank), dense weight 1,
+        BM25 weight `bm25_weight` (default config.BM25_WEIGHT).
+        mode "dense" or "bm25": one retriever alone (for comparing them in evaluation).
+        mode "rerank": the top RERANK_POOL hybrid results re-scored by a cross-encoder.
+        Default mode: "rerank" if config.RERANK is on, else "hybrid"."""
+        mode = mode or ("rerank" if config.RERANK else "hybrid")
         bm25 = self._load_bm25()
         if bm25 is None:
             raise RuntimeError("Profile index is empty. Add files to profile/ and run: python ingest.py")
         if mode not in self.MODES:
             raise ValueError(f"mode must be one of {self.MODES}")
+        if mode == "rerank":
+            pool = self.search(query, k=max(k, config.RERANK_POOL), mode="hybrid", bm25_weight=bm25_weight)
+            scores = self._rerank_scores(query, [d.page_content for d in pool])
+            order = sorted(range(len(pool)), key=lambda i: -scores[i])
+            return [pool[i] for i in order[:k]]
+        weight = config.BM25_WEIGHT if bm25_weight is None else bm25_weight
         pool = k * 3 if mode == "hybrid" else k
-        rankings = []
+        rankings = []   # (weight, ranked chunk ids)
 
         if mode in ("hybrid", "dense"):
             dense = self.vs.similarity_search(query, k=min(pool, len(self._chunks)))
-            rankings.append([d.metadata["chunk_id"] for d in dense])
+            rankings.append((1.0, [d.metadata["chunk_id"] for d in dense]))
         if mode in ("hybrid", "bm25"):
             scores = bm25.get_scores(tokenize(query))
             order = sorted(range(len(scores)), key=lambda i: -scores[i])
-            rankings.append([self._chunks[i].metadata["chunk_id"] for i in order[:pool] if scores[i] > 0])
+            rankings.append((weight if mode == "hybrid" else 1.0,
+                             [self._chunks[i].metadata["chunk_id"] for i in order[:pool] if scores[i] > 0]))
 
         fused: dict[str, float] = {}
-        for ranking in rankings:
+        for w, ranking in rankings:
             for rank, cid in enumerate(ranking):
-                fused[cid] = fused.get(cid, 0.0) + 1.0 / (60 + rank)
+                fused[cid] = fused.get(cid, 0.0) + w / (60 + rank)
 
         by_id = {c.metadata["chunk_id"]: c for c in self._chunks}
         best = sorted(fused, key=lambda cid: -fused[cid])[:k]
         return [by_id[cid] for cid in best if cid in by_id]
+
+    def _rerank_scores(self, query: str, texts: list[str]) -> list[float]:
+        if self._reranker is None:
+            self._reranker = load_reranker()
+        return list(self._reranker(query, texts))
+
+
+_RERANKER = None
+
+
+def load_reranker(model: str | None = None):
+    """The cross-encoder as a function (query, texts) -> scores. Loaded once per process."""
+    global _RERANKER
+    if _RERANKER is None:
+        try:
+            from sentence_transformers import CrossEncoder
+        except ImportError as e:
+            raise RuntimeError("The reranker needs sentence-transformers (pip install sentence-transformers).") from e
+        encoder = CrossEncoder(model or config.RERANK_MODEL, max_length=512)
+        _RERANKER = lambda query, texts: encoder.predict([(query, t) for t in texts]) if texts else []
+    return _RERANKER
 
 
 def format_hits(hits: list[Document]) -> str:

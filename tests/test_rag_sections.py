@@ -74,3 +74,27 @@ def test_index_with_sections_builds_and_finds_the_right_project(tmp_path, monkey
     assert index.build(str(folder)) >= 5
     top = index.search("LoRA 微调 PEFT", k=1)[0]
     assert top.metadata["section"] == "面向特定人群的 LoRA 微调"
+
+
+def test_synthetic_benchmark_is_consistent():
+    """Every benchmark query has at least one relevant chunk, and no fictional document mentions the owner."""
+    from pathlib import Path
+
+    from jobagent.agent_eval import read_retrieval_cases
+    from jobagent.rag import load_documents
+
+    bench = Path(__file__).parent.parent / "eval" / "retrieval_bench"
+    chunks = split_documents(load_documents(str(bench / "docs")), by_section=False)
+    cases = read_retrieval_cases(bench / "cases.csv")
+    assert len(cases) >= 40 and len(chunks) >= 30
+    assert all(relevant_ids(chunks, c["phrases"]) for c in cases)
+    # each key phrase must point to exactly one document: matching ignores spaces, so a short phrase can hit an
+    # unrelated document by accident ("DPO" inside "and pop-ups")
+    from jobagent.agent_eval import _squash
+
+    for c in cases:
+        for p in c["phrases"]:
+            docs = {ch.metadata["source"] for ch in chunks if _squash(p) in _squash(ch.page_content)}
+            assert len(docs) == 1, f"{c['query']!r}: key phrase {p!r} matches {sorted(docs)}"
+    assert all("fictional" in d.page_content.lower() or "虚构" in d.page_content
+               for d in load_documents(str(bench / "docs")))

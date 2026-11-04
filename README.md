@@ -218,6 +218,16 @@ python evaluate_agent.py retrieval v1   # 检索命中率: recall@5, hit@5, MRR 
   top 5 holds almost everything and the report warns that the numbers say little: add more material
   to `profile/` first.
 
+- **Synthetic retrieval benchmark** (`python evaluate_agent.py retrieval v1 --bench`): a one-page profile is too
+  small to compare retrieval methods (top 5 covers a third of it), so `eval/retrieval_bench/` holds ten
+  **fictional** candidates' project notes in Chinese and English (34 chunks) with deliberate look-alikes (two OCR
+  projects, several ranking and evaluation projects) and 43 queries: exact terms, paraphrases, and cross-lingual
+  queries (an English question about a Chinese document). It has its own index and never touches `profile/`.
+
+- **Fusion and reranking options:** `BM25_WEIGHT` sets the BM25 list's weight in Reciprocal Rank Fusion (1.0 =
+  equal), and `--rerank` adds a cross-encoder (`RERANK_MODEL`, default bge-reranker-v2-m3) that re-scores the top 20
+  hybrid results. Both are off by default until measured on the profile set and the synthetic benchmark.
+
 Both add rows to `eval/agent_history.csv`, so versions can be compared.
 
 Results so far (deepseek-flash): routing 97.4% (v1) → 100% (v2, after one prompt fix, on the same 38

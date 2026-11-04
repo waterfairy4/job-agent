@@ -2,6 +2,11 @@
 
   python evaluate_agent.py routing v1   -> eval/routing-v1.md   (路由准确率: right first tool?)
   python evaluate_agent.py retrieval v1 -> eval/retrieval-v1.md (检索命中率: BM25 vs dense vs hybrid)
+  python evaluate_agent.py retrieval v1 --bench -> eval/retrieval-bench-v1.md: the same on a fixed SYNTHETIC
+                                        benchmark (eval/retrieval_bench: fictional candidates, 43 queries),
+                                        for comparing retrieval methods; your profile/ is not used
+  ... --rerank                         -> adds a row: hybrid top 20 re-scored by a cross-encoder (RERANK_MODEL)
+  BM25 weight in hybrid fusion: set BM25_WEIGHT (PowerShell: $env:BM25_WEIGHT="0.5") before running
   python evaluate_agent.py compare v1 v2 -> is routing v2 really better? (paired McNemar test + bootstrap CI)
 
 Test cases: eval/routing_cases.csv and eval/retrieval_cases.csv (edit or add rows freely).
@@ -50,31 +55,47 @@ def routing(version: str):
     print(text)
 
 
-def retrieval(version: str):
+BENCH = EVAL / "retrieval_bench"
+
+
+def retrieval(version: str, bench: bool = False, rerank: bool = False):
     from jobagent.rag import ProfileIndex
 
-    index = ProfileIndex()
-    cases = read_retrieval_cases(EVAL / "retrieval_cases.csv")
-    res = evaluate_retrieval(index, cases, k=config.MATCH_TOP_K)
+    if bench:  # fixed fictional corpus, its own index; never mixed with profile/
+        index = ProfileIndex(persist_dir=str(Path(config.DATA_DIR) / "chroma-bench"))
+        index.build(str(BENCH / "docs"))
+        cases, name, metric = read_retrieval_cases(BENCH / "cases.csv"), f"retrieval-bench-{version}", "bench_recall"
+    else:
+        index = ProfileIndex()
+        cases, name, metric = read_retrieval_cases(EVAL / "retrieval_cases.csv"), f"retrieval-{version}", "recall"
+    modes = ("bm25", "dense", "hybrid") + (("rerank",) if rerank else ())
+    if rerank:
+        print(f"Reranking with {config.RERANK_MODEL} (downloaded once on first use)...")
+    res = evaluate_retrieval(index, cases, k=config.MATCH_TOP_K, modes=modes)
     text = retrieval_markdown(res)
-    (EVAL / f"retrieval-{version}.md").write_text(text, encoding="utf-8")
+    if bench:
+        text = text.replace("# Retrieval hit rate (检索命中率)", "# Retrieval hit rate, synthetic benchmark (检索命中率)", 1)
     settings = (f"{res['chunks']} chunks, chunk size {config.CHUNK_SIZE}, {config.EMBED_MODEL}, "
-                f"section chunks {'on' if config.SECTION_CHUNKS else 'off'}")
+                f"section chunks {'on' if config.SECTION_CHUNKS else 'off'}, BM25 weight {config.BM25_WEIGHT}"
+                + (f", reranker {config.RERANK_MODEL} top {config.RERANK_POOL}" if rerank else ""))
+    text = text.rstrip("\n") + f"\n\nSettings: {settings}.\n"
+    (EVAL / f"{name}.md").write_text(text, encoding="utf-8")
     for mode, m in res["modes"].items():
-        log(version, f"recall@{res['k']}_{mode}", m["recall"], settings)
+        log(version, f"{metric}@{res['k']}_{mode}", m["recall"], settings)
     print(text)
 
 
 def main():
-    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    version = sys.argv[2] if len(sys.argv) > 2 else "latest"
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]  # options like --bench may come anywhere
+    cmd = args[0] if args else ""
+    version = args[1] if len(args) > 1 else "latest"
     EVAL.mkdir(exist_ok=True)
     if cmd == "routing":
         routing(version)
     elif cmd == "retrieval":
-        retrieval(version)
-    elif cmd == "compare" and len(sys.argv) > 3:
-        a, b = sys.argv[2], sys.argv[3]
+        retrieval(version, bench="--bench" in sys.argv, rerank="--rerank" in sys.argv)
+    elif cmd == "compare" and len(args) > 2:
+        a, b = args[1], args[2]
         text = compare_routing(load_routing_run(EVAL, a), load_routing_run(EVAL, b), a, b)
         (EVAL / f"routing-compare-{a}-{b}.md").write_text(text, encoding="utf-8")
         print(text)

@@ -19,3 +19,7 @@ __pycache__/
 android/.gradle/
 android/build/
 
+
+# Editor workspace
+*.code-workspace
+

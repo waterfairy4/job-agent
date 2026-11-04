@@ -1,0 +1,44 @@
+query,relevant,note
+Milvus 向量数据库,Milvus,exact term
+交叉编码器重排检索结果,bge-reranker|ColBERT,paraphrase; two RAG projects
+reranking retrieved passages before answering,bge-reranker|ColBERT,English paraphrase; Chinese doc counts too
+知识库问答的召回率是多少,召回率@5 从 71%,number lookup; distractor: other recall numbers
+legal contract search with citations,"40,000 contracts|citation accuracy",domain words
+哪个项目把扫描 PDF 转成文字,Tesseract,cross-lingual: Chinese query; English doc; distractor: invoice OCR
+invoice text recognition,增值税发票,cross-lingual: English query; Chinese doc; distractor: receipt OCR
+receipt OCR,PaddleOCR,exact; distractor: invoice OCR
+math reasoning benchmark in Chinese,C-MathEval,cross-lingual
+LLM 自动判分与人工一致性,Cohen's κ 为 0.81|agreement 86%,two LLM-judge projects
+数据污染检测,13-gram,paraphrase of the method
+code generation evaluation pass@k,pass@1,exact-ish; distractor: other evaluations
+机器翻译自动指标和人工评分的相关性,COMET,paraphrase
+Turkish NLI test set written by native speakers,premise–hypothesis,exact domain
+translation artifacts in benchmarks,translation artifacts,English exact
+土耳其语语音识别,Whisper,cross-lingual
+annotation agreement for sentiment labels,Krippendorff,paraphrase; distractor: other agreement numbers
+医疗对话指令微调,8 万条脱敏医患对话,domain words
+DPO preference alignment,DPO 做偏好对齐,cross-lingual: English query; Chinese doc
+GRPO with verifiable rewards,GRPO,cross-lingual
+LoRA rank 16 训练配置,rank 16,exact
+synthetic instruction data generation,Self-Instruct,cross-lingual paraphrase
+奖励模型偏爱长回答,长度归一化,paraphrase
+browser automation agent,Playwright,paraphrase
+WebArena success rate,WebArena,exact
+agent that waits for a human before refunds,pause the graph,paraphrase of human-in-the-loop
+how are agent failures turned into regression tests,full trajectory|new regression tests,paraphrase
+智能体评测框架,Agent evaluation harness,cross-lingual; distractor: evaluation platform (Li)
+双塔召回模型,双塔,exact
+click-through rate prediction for ads,DeepFM,cross-lingual
+推荐系统线上 A/B 实验结果,人均观看时长,paraphrase; distractor: e-commerce search A/B
+learning to rank for product search,LambdaMART,paraphrase
+vLLM continuous batching throughput,continuous batching,exact
+model quantization to save GPU memory,AWQ,paraphrase
+推理服务的延迟监控,Prometheus,cross-lingual; distractor: eBPF monitoring
+cost per team for LLM API calls,tokens per team,paraphrase
+缺陷检测模型部署到边缘设备,Jetson,paraphrase
+small object recall improved by data augmentation,小目标裂纹,cross-lingual
+Kafka streaming into ClickHouse,ClickHouse,exact
+TCP retransmissions measured with eBPF,retransmissions,exact; distractor: congestion control project
+BBR versus Cubic fairness,Mininet,paraphrase; distractor: eBPF TCP project
+log anomaly detection on service logs,isolation forest,paraphrase
+知识图谱多跳问答,Neo4j,paraphrase; distractor: RAG projects

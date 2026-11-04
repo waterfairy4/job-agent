@@ -28,6 +28,13 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-m3")
 # Retrieval
 TOP_K = int(os.getenv("TOP_K", "5"))              # search_profile results
 MATCH_TOP_K = int(os.getenv("MATCH_TOP_K", "5"))  # evidence chunks per job item (v1 used 3)
+# Hybrid fusion: weight of the BM25 list in Reciprocal Rank Fusion (dense = 1.0). 1.0 = equal weights.
+BM25_WEIGHT = float(os.getenv("BM25_WEIGHT", "1.0"))
+# Optional reranker: a cross-encoder re-scores the top RERANK_POOL hybrid results (needs sentence-transformers,
+# one-time model download; slow downloads: HF_ENDPOINT=https://hf-mirror.com). Off by default until measured.
+RERANK = os.getenv("RERANK", "0") in ("1", "true", "yes")
+RERANK_MODEL = os.getenv("RERANK_MODEL", "BAAI/bge-reranker-v2-m3")
+RERANK_POOL = int(os.getenv("RERANK_POOL", "20"))
 # Expand each job item into concrete search terms before retrieval ("DL frameworks" -> PyTorch, ...)
 QUERY_EXPANSION = os.getenv("QUERY_EXPANSION", "1") not in ("0", "false", "no")
 
