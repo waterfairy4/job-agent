@@ -22,6 +22,9 @@ from jobagent import config
 SYSTEM_PROMPT = """You are a job application assistant for one user.
 Workflow:
 - When the user pastes a job posting, call analyze_job, then match_job with the returned job_id.
+  Pass the posting to analyze_job exactly as the user pasted it: do not reformat, shorten, translate or add
+  lines (such as "公司：…"). The same posting must give the same job_id, so its analysis and score are reused
+  instead of changing from run to run.
   This includes short or partial descriptions (a title plus a few duties or requirements) and requests
   like "analyze this job" or "帮我分析一下这个岗位": analyze first, never judge the fit from memory.
 - When the user gives a LINK to a posting, call fetch_job, then match_job. If the page cannot be read,
