@@ -270,3 +270,11 @@ def test_dropped_language_is_put_back_word_for_word():
     assert restore_languages(cv, source) == ["韩语"]
     assert cv.sections[0].entries[0].bullets == ["土耳其语（母语）· 英语（专业工作水平） · 韩语（会话水平）。"]
     assert restore_languages(cv, source) == [] and "韩语（会话水平）" in cv_plain_text(cv)
+
+
+def test_gap_plan_prompt_forbids_upgrading_experience():
+    """Seen in use: plan_gaps suggested presenting a portfolio demo as an "internal pilot" with user numbers."""
+    from jobagent.tools import GAP_PROMPT
+
+    for phrase in ("Never upgrade it", "pilot", "users", "measure X first", "A portfolio demo stays a demo"):
+        assert phrase in GAP_PROMPT

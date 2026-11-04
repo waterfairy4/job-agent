@@ -195,6 +195,12 @@ For each gap, propose ONE action:
 - build: a small, realistic project that creates proof (prefer projects that reuse their existing work)
 - learn: something to study well enough to discuss in an interview
 Be concrete and realistic; prefer the cheapest action that creates real proof. Most important first.
+Honesty rules (the candidate will copy your wording into applications):
+- add_evidence and reframe may only reword what the background excerpts show. Never upgrade it: no
+  "internal launch", "pilot", "production", "users", "team lead" or any number, duration or result that
+  the excerpts do not state. A portfolio demo stays a demo; a course project stays a course project.
+- If an action needs a number the candidate has not measured, say "measure X first", never give the number.
+- Never claim the candidate already did a build or learn action; those are suggestions for future work.
 
 Job: {title} at {company}
 
